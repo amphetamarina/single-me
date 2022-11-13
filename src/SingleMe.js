@@ -4,27 +4,7 @@ import { PDFDocument } from 'pdf-lib';
 const SingleMe = ({ url }) => {
   const [doubleColumnPdf, setDoubleColumnPdf] = useState(null);
   const [singleColumnPdf, setSingleColumnPdf] = useState(null);
-
-  useEffect(() => {
-    const fetchPDF = async () => {
-      const response = await fetch(url).then(res => res.arrayBuffer())
-      const pdfDoc = await PDFDocument.load(response);
-      setDoubleColumnPdf(pdfDoc);
-    };
-    fetchPDF();
-  }, [url]);
-
-  useEffect(() => { 
-    const convertToSingleColumn = async () => {
-      if (doubleColumnPdf) {
-        getSingleColumnResult(doubleColumnPdf).then(pdfDoc => {
-          setDoubleColumnPdf(pdfDoc);
-        });
-      }
-    };
-    convertToSingleColumn();
-  }, [doubleColumnPdf, getSingleColumnResult]);
-
+  // eslint-disable-next-line 
   const getSingleColumnResult = async () => {
     const singleColumnBytes = await toSingleColumn(doubleColumnPdf);
     const bytes  = new Uint8Array( singleColumnBytes ); 
@@ -51,22 +31,41 @@ const SingleMe = ({ url }) => {
     const singleColumnPdf = clonedDocument;
     const doubleColumnPages = doubleColumnPdf.getPages();
     let { width } = clonedPages[0].getMediaBox();
-    const ww = width / 2.0;
+    const halfWidth = width / 2.0;
     for (let i = 0; i < doubleColumnPages.length; i++) {
-        let { x, y, width, height } = clonedPages[0].getMediaBox();
-        console.log(`Page ${i}: ${x} ${y} ${width} ${height}`);
-        clonedPages[2 * i].setMediaBox(x, y, ww, height);
-        clonedPages[2 * i + 1].setMediaBox(x + ww, y, ww, height);
+        let { x, y, height } = clonedPages[0].getMediaBox();
+        clonedPages[2 * i].setMediaBox(x, y, halfWidth, height);
+        clonedPages[2 * i + 1].setMediaBox(x + halfWidth, y, halfWidth, height);
         singleColumnPdf.addPage(clonedPages[2 * i]);
         singleColumnPdf.addPage(clonedPages[2 * i + 1]);
         
     }
     const singleColumnBytes = await singleColumnPdf.save();
-    console.log(`Returning ${singleColumnBytes.byteLength} bytes`);
     return singleColumnBytes;
   }
+
+  useEffect(() => {
+    const fetchPDF = async () => {
+      const response = await fetch(url).then(res => res.arrayBuffer())
+      const pdfDoc = await PDFDocument.load(response);
+      setDoubleColumnPdf(pdfDoc);
+    };
+    fetchPDF();
+  }, [url]);
+
+  useEffect(() => { 
+    const convertToSingleColumn = async () => {
+      if (doubleColumnPdf) {
+        getSingleColumnResult(doubleColumnPdf).then(pdfDoc => {
+          setDoubleColumnPdf(pdfDoc);
+        });
+      }
+    };
+    convertToSingleColumn();
+  }, [doubleColumnPdf, getSingleColumnResult]);
+
   if (!singleColumnPdf) return <div>Loading</div>
-  return <iframe src={singleColumnPdf} type="application/pdf" />
+  return <iframe src={singleColumnPdf} title="paper" type="application/pdf" />
 };
 
 export default SingleMe;

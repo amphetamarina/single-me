@@ -23,7 +23,7 @@ const SingleMe = ({ url }) => {
       }
     };
     convertToSingleColumn();
-  }, [doubleColumnPdf]);
+  }, [doubleColumnPdf, getSingleColumnResult]);
 
   const getSingleColumnResult = async () => {
     const singleColumnBytes = await toSingleColumn(doubleColumnPdf);

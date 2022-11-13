@@ -1,6 +1,19 @@
 import { useEffect, useState } from 'react';
 import { PDFDocument } from 'pdf-lib';
 
+const download = (url, filename) => {
+  fetch(url)
+    .then(res => res.blob())
+    .then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    });
+};
+
 const SingleMe = ({ url }) => {
   const [doubleColumnPdf, setDoubleColumnPdf] = useState(null);
   const [singleColumnPdf, setSingleColumnPdf] = useState(null);
@@ -65,7 +78,7 @@ const SingleMe = ({ url }) => {
   }, [doubleColumnPdf, getSingleColumnResult]);
 
   if (!singleColumnPdf) return <div>Loading</div>
-  return <iframe src={singleColumnPdf} title="paper" type="application/pdf" />
+  download(singleColumnPdf, "output.pdf");
 };
 
 export default SingleMe;

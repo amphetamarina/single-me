@@ -1,12 +1,14 @@
-import logo from './logo.svg';
 import SingleMe from './SingleMe';
 import './App.css';
+import { Route } from "wouter";
+
 
 function App() {
   return (
     <div className="App">
-      {/* <SingleMe url="https://arxiv.org/pdf/2207.09238.pdf" /> */}
-      <SingleMe url="https://www.willus.com/k2pdfopt/examples/original/ieee_twocolumn_template.pdf" />
+      <Route path="/single-me/:arxvId">
+          {({arxvId}) => <SingleMe url={ `https://arxiv.org/pdf/${arxvId}.pdf`} />}
+        </Route>
     </div>
   );
 }
